@@ -3,28 +3,42 @@ package com.kangwang.ffmpeddemo;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.os.Bundle;
+import android.os.Environment;
+import android.os.FileObserver;
+import android.view.SurfaceView;
+import android.view.View;
 import android.widget.TextView;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 
 public class MainActivity extends AppCompatActivity {
 
-    // Used to load the 'native-lib' library on application startup.
-    static {
-        System.loadLibrary("native-lib");
-    }
-
+    FFmpegdiaPlayer player;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        // Example of a call to a native method
-        TextView tv = findViewById(R.id.sample_text);
-        tv.setText(stringFromJNI());
+        SurfaceView surfaceView = findViewById(R.id.surfaceView);
+        player = new FFmpegdiaPlayer(surfaceView);
     }
 
-    /**
-     * A native method that is implemented by the 'native-lib' native library,
-     * which is packaged with this application.
-     */
-    public native String stringFromJNI();
+    public void open(View view){
+//        player.start(Environment.getExternalStorageDirectory().
+//                getAbsolutePath() + "/input.mp4");
+        String s = Environment.getExternalStorageDirectory().
+                getAbsolutePath() + "/input.mp4";
+        player.start(s);
+//        try {
+//            FileInputStream i = new FileInputStream(new File(s));
+//        } catch (FileNotFoundException e) {
+//            e.printStackTrace();
+//        }
+        System.out.println(player.stringFromJNI());
+
+    }
 }

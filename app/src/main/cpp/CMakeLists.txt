@@ -3,41 +3,30 @@ cmake_minimum_required(VERSION 3.10.2)
 
 project("ffmpeddemo")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++11")
-set(jnilibs ${CMAKE_SOURCE_DIR}/../libs)
-set(libname native-lib)
+set(libs ${CMAKE_SOURCE_DIR}/../libs)
+set(libname play)  #编译之后的名字  不一样要和文件名相同
+
+#编译的文件 在include文件夹下、、、
 
 include_directories(
         include
-        ${CMAKE_SOURCE_DIR}/util
-        ${CMAKE_SOURCE_DIR}/player
-        ${CMAKE_SOURCE_DIR}/player/render
+#        ${CMAKE_SOURCE_DIR}/util
 )
 
 link_directories(
-        ${jnilibs}/${ANDROID_ABI})
+        ${libs}/${ANDROID_ABI})
 
+#编译那些文件
 file(GLOB src-files
         ${CMAKE_SOURCE_DIR}/*.cpp
-        ${CMAKE_SOURCE_DIR}/util/*.cpp
-        ${CMAKE_SOURCE_DIR}/player/*.cpp
-        ${CMAKE_SOURCE_DIR}/player/decoder/*.cpp
-        ${CMAKE_SOURCE_DIR}/player/render/video/*.cpp
-        ${CMAKE_SOURCE_DIR}/player/render/audio/*.cpp
-        ${CMAKE_SOURCE_DIR}/recorder/SingleVideoRecorder.cpp
-        ${CMAKE_SOURCE_DIR}/recorder/SingleAudioRecorder.cpp
-        ${CMAKE_SOURCE_DIR}/recorder/MediaRecorderContext.cpp
-        ${CMAKE_SOURCE_DIR}/recorder/GLCameraRender.cpp
-        ${CMAKE_SOURCE_DIR}/recorder/MediaRecorder.cpp
         )
 
 add_library( # Sets the name of the library.
         ${libname}
-
         # Sets the library as a shared library.
         SHARED
-
         # Provides a relative path to your source file(s).
-        ${src-files}
+        ${src-files}  #加入的就是上面指定文件下的所有
         )
 
 set(third-party-libs
@@ -53,38 +42,14 @@ set(third-party-libs
 
 set(native-libs
         android
-        EGL
-        GLESv3
-        OpenSLES
         log
-        m
-        z
         )
 
 target_link_libraries( # Specifies the target library.
         ${libname}
-
-        # Links the target library to the log library
-        # included in the NDK.
         ${log-lib}
         ${third-party-libs}
         ${native-libs}
+        android
+        z
         )
-#add_library( # Sets the name of the library.
-#             native-lib
-#
-#             # Sets the library as a shared library.
-#             SHARED
-#
-#             # Provides a relative path to your source file(s).
-#             native-lib.cpp )
-#
-#
-#find_library( # Sets the name of the path variable.
-#              log-lib
-#              log )
-#
-#target_link_libraries( # Specifies the target library.
-#                       native-lib
-#
-#                       ${log-lib} )
