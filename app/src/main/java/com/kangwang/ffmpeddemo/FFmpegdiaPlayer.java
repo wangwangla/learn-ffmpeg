@@ -49,5 +49,11 @@ public class FFmpegdiaPlayer implements SurfaceHolder.Callback {
         }
     }
 
+    public void playMp3(String s, String absolutePath){
+        natvie_startMp3(s,absolutePath);
+    }
+
+    public native void natvie_startMp3(String input,String out);
+
     public native void natvie_start(String absolutePath, Surface surface);
 }
