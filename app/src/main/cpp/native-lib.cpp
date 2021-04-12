@@ -1,7 +1,7 @@
 #include <jni.h>
 #include <string>
 #include <android/native_window_jni.h>
-#include <android/log.h>
+#include <LogUtils.h>
 
 extern "C" {
 #include <libswscale/swscale.h>
@@ -14,21 +14,14 @@ extern "C" {
 #include <libswresample/version.h>
 #include <libswscale/version.h>
 #include <libavformat/avformat.h>
-
 #include <libswresample/swresample.h>
 };
-
-
-#define  LOG_TAG    "hb-4"
-#define  LOGI(...)  __android_log_print(ANDROID_LOG_INFO, LOG_TAG, __VA_ARGS__)
-#define LOGE(...)  __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, __VA_ARGS__)
-#define MAX_AUDIO_FRAME 4800*4   //采样率
 
 extern "C" JNIEXPORT jstring JNICALL
 Java_com_kangwang_ffmpeddemo_FFmpegdiaPlayer_stringFromJNI(
         JNIEnv* env,
         jobject /* this */) {
-    LOGI("------------read vseion  kkkww");
+    LOGCATE("------------read vseion  kkkww");
     std::string hello = av_version_info();
     std::string avutil = std::to_string(avutil_version());
     hello.append(avutil);
@@ -45,10 +38,10 @@ Java_com_kangwang_ffmpeddemo_FFmpegdiaPlayer_natvie_1start(JNIEnv *env, jobject 
     //  渲染
     ANativeWindow  *nativeWindow = ANativeWindow_fromSurface(env,surface);
 //  将数据写入 到 缓存区
-    LOGE("start_path");
+    LOGCATE("start_path");
     const char *path = env->GetStringUTFChars(absolute_path,0);
 //    视频  音频  绘制
-    LOGE("init_net");
+    LOGCATE("init_net");
     avformat_network_init();
     //总上下文
     AVFormatContext  *formatContext = avformat_alloc_context();
@@ -60,10 +53,10 @@ Java_com_kangwang_ffmpeddemo_FFmpegdiaPlayer_natvie_1start(JNIEnv *env, jobject 
     //打开文件
     int ret = avformat_open_input(&formatContext,path,NULL,&opts);
     if (ret){   //为0表示成功
-        LOGI("---------------->失败");
+        LOGCATE("---------------->失败");
         return;
     }else{
-        LOGI("------------->>success");
+        LOGCATE("------------->>success");
     }
     int video_stream_index = 0;
     //读取成功    读取视频流  解析出来
@@ -123,9 +116,9 @@ Java_com_kangwang_ffmpeddemo_FFmpegdiaPlayer_natvie_1start(JNIEnv *env, jobject 
             memcpy(fistWindown+i*destStride,src_data+i*src_linesize,destStride);
         }
         ANativeWindow_unlockAndPost(nativeWindow);
-        LOGI("显示----");
+        LOGCATE("显示----");
     }
-    LOGE("播放结束");
+    LOGCATE("播放结束");
     env->ReleaseStringUTFChars(absolute_path,path);
 }extern "C"
 JNIEXPORT void JNICALL
@@ -140,7 +133,7 @@ Java_com_kangwang_ffmpeddemo_FFmpegdiaPlayer_natvie_1startMp3(JNIEnv *env, jobje
     //打开音频
     int ret = avformat_open_input(&context,inputPath,NULL,NULL);
     if(ret){
-        LOGE("error load file !!!");
+        LOGCATE("error load file !!!");
     }
     //读取流通道
     avformat_find_stream_info(context,NULL);
@@ -186,11 +179,11 @@ Java_com_kangwang_ffmpeddemo_FFmpegdiaPlayer_natvie_1startMp3(JNIEnv *env, jobje
         AVFrame *frame = av_frame_alloc();
         int ret = avcodec_receive_frame(avCodecContext,frame);
 
-        LOGE("解码中");
+        LOGCATE("解码中");
         if (ret == AVERROR(EAGAIN)){
             continue;
         } else if (ret < 0 ){
-            LOGE("解码完成");
+            LOGCATE("解码完成");
             break;
         }
         if (avPacket->stream_index != audioIndex){
