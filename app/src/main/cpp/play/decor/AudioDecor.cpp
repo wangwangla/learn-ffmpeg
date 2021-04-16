@@ -4,6 +4,7 @@
 
 #include "AudioDecor.h"
 
-AudioDecor::AudioDecor(char *string) {
+AudioDecor::AudioDecor(JNIEnv *jniEnv, char *string) {
+
 
 }

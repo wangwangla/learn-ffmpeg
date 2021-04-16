@@ -11,8 +11,8 @@
 class VideoDecoder {
 
 public:
-    VideoDecoder(JNIEnv *jniEnv,char *url);
-    void Init(JNIEnv *jniEnv, jobject obj, char *url, int renderType, jobject surface);
+    VideoDecoder(JNIEnv *jniEnv, char *url);
+    void Init(JNIEnv *jniEnv, jobject obj, char *url, jobject surface);
 };
 
 

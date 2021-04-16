@@ -18,7 +18,7 @@ public:
     VideoPlay(){};
     ~VideoPlay(){};
 
-    void Init(JNIEnv *jniEnv, jobject obj, char *url, int renderType, jobject surface);
+    void Init(JNIEnv *jniEnv, jobject obj, char *url, jobject surface);
     void UnInit();
 
     void Play();

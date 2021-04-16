@@ -5,6 +5,8 @@
 #ifndef FFMPEDDEMO_AUDIODECOR_H
 #define FFMPEDDEMO_AUDIODECOR_H
 
+
+#include <jni.h>
 class AudioDecor {
 
 public:

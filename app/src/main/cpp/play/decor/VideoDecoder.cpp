@@ -2,17 +2,22 @@
 // Created by 28188 on 2021/4/13.
 //
 
-#include <libavutil/imgutils.h>
+#include "AudioDecor.h"
 #include "VideoDecoder.h"
+extern "C" {
+#include <libavutil/imgutils.h>
 #include "../../include/libavformat/avformat.h"
 #include "../../include/libavutil/avutil.h"
 #include "../../include/libavcodec/avcodec.h"
 #include "../../include/libswscale/swscale.h"
 #include "../../include/libavutil/frame.h"
-#include "AudioDecor.h"
 #include "../../utils/LogUtils.h"
+}
+VideoDecoder::VideoDecoder(JNIEnv *jniEnv, char *url) {
 
-void VideoDecoder::Init(JNIEnv *env, jobject obj, char *url, int renderType, jobject surface) {
+}
+
+void VideoDecoder::Init(JNIEnv *env, jobject obj, char *url, jobject surface) {
     //  渲染
     ANativeWindow  *nativeWindow = ANativeWindow_fromSurface(env,surface);
 //  将数据写入 到 缓存区
