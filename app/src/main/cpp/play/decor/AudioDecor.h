@@ -11,6 +11,7 @@ class AudioDecor {
 
 public:
     AudioDecor(JNIEnv *jniEnv,char *string);
+    void CreateEngine();
 };
 
 #endif //FFMPEDDEMO_AUDIODECOR_H

@@ -54,6 +54,7 @@ set(third-party-libs
 set(native-libs
         android
         log
+        OpenSLES
         )
 
 target_link_libraries( # Specifies the target library.
