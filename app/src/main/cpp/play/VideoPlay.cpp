@@ -8,8 +8,12 @@ void VideoPlay:: Init(JNIEnv *jniEnv, jobject obj, char *url, jobject surface) {
     jniEnv->GetJavaVM(&m_JavaVM);
     m_JavaObj = jniEnv->NewGlobalRef(obj);
     m_VideoDecoder = new VideoDecoder(jniEnv,url);
-    m_AudioDecoder = new AudioDecor(jniEnv,url);
+    m_AudioDecoder = new AudioDecor(jniEnv,obj,url);
     m_VideoDecoder->Init(jniEnv,obj,url,surface);
+}
 
+void VideoPlay::Play() {
+    if(m_VideoDecoder)
+        m_VideoDecoder->Play();
 }
 

@@ -19,7 +19,7 @@ VideoDecoder::VideoDecoder(JNIEnv *jniEnv, char *url) {
 
 void VideoDecoder::Init(JNIEnv *env, jobject obj, char *url, jobject surface) {
     //  渲染
-    ANativeWindow  *nativeWindow = ANativeWindow_fromSurface(env,surface);
+    nativeWindow = ANativeWindow_fromSurface(env,surface);
 //  将数据写入 到 缓存区
     LOGCATE("start_path");
     const char *path = url;
@@ -27,14 +27,14 @@ void VideoDecoder::Init(JNIEnv *env, jobject obj, char *url, jobject surface) {
     LOGCATE("init_net");
     avformat_network_init();
     //总上下文
-    AVFormatContext  *formatContext = avformat_alloc_context();
+    formatContext = avformat_alloc_context();
     //从字典中取值
     AVDictionary *opts = NULL;
     //如果这么久都没有打开，就认为有问题
     av_dict_set(&opts, "timeout", "30000000", 0);
 
     //打开文件
-    int ret = avformat_open_input(&formatContext,path,NULL,&opts);
+    ret = avformat_open_input(&formatContext,path,NULL,&opts);
     if (ret){   //为0表示成功
         LOGCATE("---------------->失败");
         return;
@@ -55,25 +55,29 @@ void VideoDecoder::Init(JNIEnv *env, jobject obj, char *url, jobject surface) {
     //得到流的参数
     AVCodecParameters *parameters = formatContext->streams[video_stream_index]->codecpar;
     //我们现在对流进行解码   使用解码器的id  得到解码器
-    AVCodec *vcode = avcodec_find_decoder(parameters->codec_id);
+    vcode = avcodec_find_decoder(parameters->codec_id);
     //创建解码器 的上下文
-    AVCodecContext *avCodecContex = avcodec_alloc_context3(vcode);
+    avCodecContex = avcodec_alloc_context3(vcode);
     //将解码器的 参数复制到 上下文
-    avcodec_parameters_to_context(avCodecContex,parameters);\
+    avcodec_parameters_to_context(avCodecContex,parameters);
 
+
+
+
+}
+
+void VideoDecoder::Play() {
     //打开解码器
     avcodec_open2(avCodecContex,vcode,NULL);
-//    解码yuv数据
     AVPacket *avPacket = av_packet_alloc();
 //    读取视频流
-
     SwsContext *swsContext = sws_getContext(avCodecContex->width,avCodecContex->height,
                                             avCodecContex->pix_fmt,avCodecContex->width,
                                             avCodecContex->height,AV_PIX_FMT_RGBA,
                                             SWS_BILINEAR,0,0,0);
     ANativeWindow_setBuffersGeometry(nativeWindow,avCodecContex->width,avCodecContex->height,WINDOW_FORMAT_RGBA_8888);
     ANativeWindow_Buffer outBuffer;
-    while (av_read_frame(formatContext,avPacket)>=0){
+    while (av_read_frame(formatContext, avPacket) >= 0){
         avcodec_send_packet(avCodecContex,avPacket);
         AVFrame  *frame = av_frame_alloc();
         ret = avcodec_receive_frame(avCodecContex,frame);

@@ -11,21 +11,26 @@ import androidx.annotation.NonNull;
 
 public class FFmpegdiaPlayer implements SurfaceHolder.Callback {
     // Used to load the 'native-lib' library on application startup.
-    private SurfaceView surfaceView; //绘制表面
+    private long videoHandle;
     private SurfaceHolder surfaceHolder;
     static {
         System.loadLibrary("play");
     }
 
     public FFmpegdiaPlayer(SurfaceView surfaceView) {
-        this.surfaceView = surfaceView;
         if (surfaceHolder != null){
             surfaceHolder.removeCallback(this);
         }
         surfaceHolder = surfaceView.getHolder();
         surfaceHolder.addCallback(this);
-
     }
+
+    public void initVideo(String path){
+        //得到播放器对象
+        videoHandle = native_init(path,surfaceHolder.getSurface());
+    }
+
+    private native long native_init(String path,Surface surface);
 
     public native String stringFromJNI();
 
@@ -44,9 +49,9 @@ public class FFmpegdiaPlayer implements SurfaceHolder.Callback {
 
     }
 
-    public void start(String absolutePath) {
+    public void start() {
         try {
-            natvie_start(absolutePath, surfaceHolder.getSurface());
+            natvie_start(videoHandle);
         }catch (Exception e) {
             System.out.println("------------call  error");
         }
@@ -56,12 +61,13 @@ public class FFmpegdiaPlayer implements SurfaceHolder.Callback {
         natvie_startMp3(s,absolutePath);
     }
 
+    public native void natvie_zhuanma(String input,String out);
+
     public native void natvie_startMp3(String input,String out);
 
-    public native void natvie_start(String absolutePath, Surface surface);
+    public native void natvie_start(long videoHandle);
 
     public void createTrack(int sampleRateInHz,int nb_channals) {
-
         int channaleConfig;//通道数
         if (nb_channals == 1) {
             channaleConfig = AudioFormat.CHANNEL_OUT_MONO;

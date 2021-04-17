@@ -39,6 +39,7 @@ private:
 
     VideoDecoder *m_VideoDecoder = nullptr;
     AudioDecor *m_AudioDecoder = nullptr;
+
 //
 //    VideoRender *m_VideoRender = nullptr;
 //    AudioRender *m_AudioRender = nullptr;

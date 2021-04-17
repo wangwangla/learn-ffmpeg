@@ -37,35 +37,12 @@ public class MainActivity extends AppCompatActivity {
                 })) {
             String s = Environment.getExternalStorageDirectory().
                     getAbsolutePath() + "/input.mp4";
-            player.start(s);
+            player.initVideo(s);
         }
-//        player.start(Environment.getExternalStorageDirectory().
-//                getAbsolutePath() + "/input.mp4");
-//        String s = Environment.getExternalStorageDirectory().
-//                getAbsolutePath() + "/input.mp4";
-//        player.start(s);
-//        try {
-//            FileInputStream i = new FileInputStream(new File(s));
-//        } catch (FileNotFoundException e) {
-//            e.printStackTrace();
-//        }
-//        System.out.println(player.stringFromJNI());
-
     }
 
     public void convert(View view){
-        String s = Environment.getExternalStorageDirectory().
-                getAbsolutePath() + "/1.mp3";
-        String s1 = Environment.getExternalStorageDirectory().
-                getAbsolutePath() + "/22.pcm";
-        player.playMp3(s,s1);
-//        try {
-//            FileInputStream i = new FileInputStream(new File(s));
-//            System.out.println("文件 存在");
-//        } catch (FileNotFoundException e) {
-//            e.printStackTrace();
-//        }
-
+        player.start();
     }
 
     private void checkPermissions() {

@@ -10,8 +10,7 @@
 class AudioDecor {
 
 public:
-    AudioDecor(JNIEnv *jniEnv,char *string);
-    void CreateEngine();
+    AudioDecor(JNIEnv *jniEnv,jobject instance,char *string);
 };
 
 #endif //FFMPEDDEMO_AUDIODECOR_H
