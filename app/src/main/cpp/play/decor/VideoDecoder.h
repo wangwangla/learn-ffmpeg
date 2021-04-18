@@ -13,6 +13,8 @@ extern "C"{
 #include <libavformat/avformat.h>
 };
 #include "AudioDecor.h"
+#include <thread>
+using namespace std;
 class VideoDecoder {
 
 public:
@@ -26,6 +28,9 @@ private:
     AVFormatContext *formatContext;
     int ret;
     AVCodec *vcode;
+    thread *m_Thread = nullptr;
+    static void DoAVDecoding(VideoDecoder *videoDecoder);
+    void DoLoop();
 };
 
 

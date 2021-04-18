@@ -13,6 +13,8 @@ extern "C" {
 #include "../../include/libavutil/frame.h"
 #include "../../utils/LogUtils.h"
 }
+
+#include <thread>
 VideoDecoder::VideoDecoder(JNIEnv *jniEnv, char *url) {
 
 }
@@ -25,9 +27,10 @@ void VideoDecoder::Init(JNIEnv *env, jobject obj, char *url, jobject surface) {
     const char *path = url;
 //    视频  音频  绘制
     LOGCATE("init_net");
+//    av_register_all();   //已经废弃了
     avformat_network_init();
     //总上下文
-    formatContext = avformat_alloc_context();
+    formatContext = avformat_alloc_context();  //处理封装格式的
     //从字典中取值
     AVDictionary *opts = NULL;
     //如果这么久都没有打开，就认为有问题
@@ -60,15 +63,12 @@ void VideoDecoder::Init(JNIEnv *env, jobject obj, char *url, jobject surface) {
     avCodecContex = avcodec_alloc_context3(vcode);
     //将解码器的 参数复制到 上下文
     avcodec_parameters_to_context(avCodecContex,parameters);
-
-
-
-
+    avcodec_open2(avCodecContex,vcode,NULL);
 }
 
-void VideoDecoder::Play() {
-    //打开解码器
-    avcodec_open2(avCodecContex,vcode,NULL);
+void  VideoDecoder::DoLoop() {
+    LOGCATE("-------------------log info  72");
+    //比如H.264压缩数据
     AVPacket *avPacket = av_packet_alloc();
 //    读取视频流
     SwsContext *swsContext = sws_getContext(avCodecContex->width,avCodecContex->height,
@@ -77,6 +77,13 @@ void VideoDecoder::Play() {
                                             SWS_BILINEAR,0,0,0);
     ANativeWindow_setBuffersGeometry(nativeWindow,avCodecContex->width,avCodecContex->height,WINDOW_FORMAT_RGBA_8888);
     ANativeWindow_Buffer outBuffer;
+
+    /**
+     * 我们这里进行一些操做
+     */
+     //得到时长
+    long time = formatContext->duration; //获取的是微秒    10  6次方
+    string name = formatContext->iformat->name;
     while (av_read_frame(formatContext, avPacket) >= 0){
         avcodec_send_packet(avCodecContex,avPacket);
         AVFrame  *frame = av_frame_alloc();
@@ -106,4 +113,54 @@ void VideoDecoder::Play() {
         LOGCATE("显示----");
     }
     LOGCATE("播放结束");
+}
+
+void VideoDecoder::DoAVDecoding(VideoDecoder *videoDecoder) {
+    videoDecoder->DoLoop();
+}
+
+void VideoDecoder::Play() {
+    if(m_Thread == NULL){
+        m_Thread = new thread(DoAVDecoding,this);
+    }
+//    m_Thread.
+    //打开解码器
+
+//    AVPacket *avPacket = av_packet_alloc();
+////    读取视频流
+//    SwsContext *swsContext = sws_getContext(avCodecContex->width,avCodecContex->height,
+//                                            avCodecContex->pix_fmt,avCodecContex->width,
+//                                            avCodecContex->height,AV_PIX_FMT_RGBA,
+//                                            SWS_BILINEAR,0,0,0);
+//    ANativeWindow_setBuffersGeometry(nativeWindow,avCodecContex->width,avCodecContex->height,WINDOW_FORMAT_RGBA_8888);
+//    ANativeWindow_Buffer outBuffer;
+//    while (av_read_frame(formatContext, avPacket) >= 0){
+//        avcodec_send_packet(avCodecContex,avPacket);
+//        AVFrame  *frame = av_frame_alloc();
+//        ret = avcodec_receive_frame(avCodecContex,frame);
+//        if (ret == AVERROR(EAGAIN)){
+//            continue;
+//        } else if (ret<0){
+//            break;
+//        }
+//
+//        //将yuv转化为RGB
+//        uint8_t  *dst_data[4];
+//        int dst_linesize[4];
+//        av_image_alloc(dst_data,dst_linesize,avCodecContex->width,avCodecContex->height,
+//                       AV_PIX_FMT_RGBA,1);
+//        sws_scale(swsContext,frame->data,frame->linesize,0,frame->height,dst_data,dst_linesize);
+//
+//        ANativeWindow_lock(nativeWindow,&outBuffer,NULL);
+//        uint8_t *fistWindown = static_cast<uint8_t *>(outBuffer.bits);
+//        uint8_t *src_data = dst_data[0];
+//        int destStride = outBuffer.stride *4;
+//        int src_linesize = dst_linesize[0];
+//        for(int  i=0;i<outBuffer.height;i++){
+//            memcpy(fistWindown+i*destStride,src_data+i*src_linesize,destStride);
+//        }
+//        ANativeWindow_unlockAndPost(nativeWindow);
+//        LOGCATE("显示----");
+//    }
+//    LOGCATE("播放结束");
 }
