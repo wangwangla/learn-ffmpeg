@@ -45,6 +45,14 @@ public class MainActivity extends AppCompatActivity {
         player.start();
     }
 
+    public void playMp3(View view){
+        String s = Environment.getExternalStorageDirectory().
+                getAbsolutePath() + "/1.mp3";
+        player.playMp3(s);
+    }
+
+
+
     private void checkPermissions() {
         PermissionUtils.requestPermissions(this, new String[] {
                 Manifest.permission.WRITE_EXTERNAL_STORAGE,

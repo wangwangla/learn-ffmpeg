@@ -33,9 +33,11 @@ Java_com_kangwang_ffmpeddemo_FFmpegdiaPlayer_stringFromJNI(
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_com_kangwang_ffmpeddemo_FFmpegdiaPlayer_natvie_1startMp3(JNIEnv *env, jobject instance,jstring input_,jstring output) {
+Java_com_kangwang_ffmpeddemo_FFmpegdiaPlayer_natvie_1startMp3(JNIEnv *env, jobject instance,jstring input_) {
     // TODO: implement natvie_startMp3()
     const char *input = env->GetStringUTFChars(input_, 0);
+    AudioDecor *audioDecor = new AudioDecor(env,instance,const_cast<char *>(input));
+
 
 
 }extern "C"

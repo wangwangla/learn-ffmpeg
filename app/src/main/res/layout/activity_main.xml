@@ -10,7 +10,6 @@
         android:id="@+id/surfaceView"
         android:layout_width="match_parent"
         android:layout_height="200dp">
-
     </SurfaceView>
     <SeekBar
         android:visibility="gone"
@@ -24,7 +23,7 @@
         android:layout_height="50dp"
         android:gravity="center"
         android:onClick="open"
-        android:text="打开"
+        android:text="加载资源"
         tools:ignore="OnClick"></Button>
 
     <Button
@@ -32,7 +31,15 @@
         android:layout_height="50dp"
         android:gravity="center"
         android:onClick="convert"
-        android:text="转换"
+        android:text="播放视频"
+        tools:ignore="OnClick"></Button>
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:gravity="center"
+        android:onClick="playMp3"
+        android:text="播放yinpin"
         tools:ignore="OnClick"></Button>
 
 

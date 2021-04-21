@@ -57,13 +57,13 @@ public class FFmpegdiaPlayer implements SurfaceHolder.Callback {
         }
     }
 
-    public void playMp3(String s, String absolutePath){
-        natvie_startMp3(s,absolutePath);
+    public void playMp3(String s){
+        natvie_startMp3(s);
     }
 
     public native void natvie_zhuanma(String input,String out);
 
-    public native void natvie_startMp3(String input,String out);
+    public native void natvie_startMp3(String input);
 
     public native void natvie_start(long videoHandle);
 
