@@ -6,16 +6,18 @@
 #define LEARNFFMPEG_PLAYBASE_H
 
 #include <jni.h>
-#include <PlayBase.h>
 
 #endif //LEARNFFMPEG_PLAYBASE_H
 
 class  PlayBase{
 public:
    PlayBase();
-   void init();
+   void init(char *url);
+   void play();
+   void stop();
+   void pause();
+   void resume();
 
-protected:
-    char *m_url;
+
 
 };

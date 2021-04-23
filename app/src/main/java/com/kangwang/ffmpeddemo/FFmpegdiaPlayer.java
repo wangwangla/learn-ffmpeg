@@ -44,4 +44,6 @@ public class FFmpegdiaPlayer implements SurfaceHolder.Callback {
     }
 
     private native String native_version();
+
+    private native long initPlay();
 }
