@@ -4,17 +4,33 @@
 
 #include "PlayBase.h"
 
-PlayBase::PlayBase() {
-
+PlayBase::PlayBase(char *url) {
+    this->m_url = url;
+    init();
+    startCoding();
 }
 
-void PlayBase::init(char *url) {
-    //base初始化二者共同的部分  初始化变量
+void PlayBase::init() {
 
 }
 
 void PlayBase::play() {
+    if(m_thread== nullptr){
+        startCoding();
+    } else{
+        std::unique_lock<std::mutex> lock(m_mutex);
+        m_Cond.notify_all();
+    }
+}
 
+void PlayBase::startCoding() {
+    m_thread = new thread(doing, this);
+}
+
+void PlayBase::doing(PlayBase *playBase) {
+//    开始执行
+    playBase->codingReady();
+    playBase->codingLoop();
 }
 
 void PlayBase::pause() {

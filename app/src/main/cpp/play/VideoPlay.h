@@ -7,15 +7,19 @@
 
 #include <jni.h>
 extern "C"{
+
+};
+
 #include "decor/VideoDecoder.h"
 #include "decor/AudioDecor.h"
-};
 #include <string>
 #include <android/native_window_jni.h>
 #include <LogUtils.h>
 
 
 class VideoPlay {
+public:
+    VideoPlay(char *url);
 };
 
 

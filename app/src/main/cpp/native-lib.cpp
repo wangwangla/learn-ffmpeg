@@ -29,3 +29,10 @@ Java_com_kangwang_ffmpeddemo_FFmpegdiaPlayer_native_1version(JNIEnv *env, jobjec
     LOGCATI("avutil");
     return env->NewStringUTF(hello.c_str());
 }
+extern "C"
+JNIEXPORT jlong JNICALL
+Java_com_kangwang_ffmpeddemo_FFmpegdiaPlayer_initPlay(JNIEnv *env, jobject thiz) {
+    char *ch = nullptr;
+    VideoPlay *videoPlay = new VideoPlay(ch);
+    return 0;
+}

@@ -22,6 +22,7 @@ public class FFmpegdiaPlayer implements SurfaceHolder.Callback {
         }
         surfaceHolder = surfaceView.getHolder();
         surfaceHolder.addCallback(this);
+        initPlay();
     }
 
     @Override
