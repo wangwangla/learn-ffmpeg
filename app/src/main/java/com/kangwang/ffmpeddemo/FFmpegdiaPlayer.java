@@ -10,12 +10,11 @@ import android.view.SurfaceView;
 import androidx.annotation.NonNull;
 
 public class FFmpegdiaPlayer implements SurfaceHolder.Callback {
-    // Used to load the 'native-lib' library on application startup.
-    private long videoHandle;
-    private SurfaceHolder surfaceHolder;
     static {
         System.loadLibrary("play");
     }
+    private long playerHandle;
+    private SurfaceHolder surfaceHolder;
 
     public FFmpegdiaPlayer(SurfaceView surfaceView) {
         if (surfaceHolder != null){
@@ -24,15 +23,6 @@ public class FFmpegdiaPlayer implements SurfaceHolder.Callback {
         surfaceHolder = surfaceView.getHolder();
         surfaceHolder.addCallback(this);
     }
-
-    public void initVideo(String path){
-        //得到播放器对象
-        videoHandle = native_init(path,surfaceHolder.getSurface());
-    }
-
-    private native long native_init(String path,Surface surface);
-
-    public native String stringFromJNI();
 
     @Override
     public void surfaceCreated(@NonNull SurfaceHolder holder) {
@@ -49,46 +39,9 @@ public class FFmpegdiaPlayer implements SurfaceHolder.Callback {
 
     }
 
-    public void start() {
-        try {
-            natvie_start(videoHandle);
-        }catch (Exception e) {
-            System.out.println("------------call  error");
-        }
+    public String versionInfo() {
+        return native_version();
     }
 
-    public void playMp3(String s){
-        natvie_startMp3(s);
-    }
-
-    public native void natvie_zhuanma(String input,String out);
-
-    public native void natvie_startMp3(String input);
-
-    public native void natvie_start(long videoHandle);
-
-    public void createTrack(int sampleRateInHz,int nb_channals) {
-        int channaleConfig;//通道数
-        if (nb_channals == 1) {
-            channaleConfig = AudioFormat.CHANNEL_OUT_MONO;
-        } else if (nb_channals == 2) {
-            channaleConfig = AudioFormat.CHANNEL_OUT_STEREO;
-        }else {
-            channaleConfig = AudioFormat.CHANNEL_OUT_MONO;
-        }
-        int buffersize= AudioTrack.getMinBufferSize(sampleRateInHz,
-                channaleConfig, AudioFormat.ENCODING_PCM_16BIT);
-        audioTrack = new AudioTrack(AudioManager.STREAM_MUSIC,sampleRateInHz,channaleConfig,
-                AudioFormat.ENCODING_PCM_16BIT,buffersize,AudioTrack.MODE_STREAM);
-        audioTrack.play();
-    }
-
-    //C传入音频数据
-    public void playTrack(byte[] buffer, int lenth) {
-        if (audioTrack != null && audioTrack.getPlayState() == AudioTrack.PLAYSTATE_PLAYING) {
-            audioTrack.write(buffer, 0, lenth);
-        }
-    }
-
-    private AudioTrack audioTrack;
+    private native String native_version();
 }

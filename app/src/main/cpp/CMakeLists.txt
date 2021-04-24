@@ -12,7 +12,8 @@ include_directories(
         include
         play
         utils
-        play/deccor
+        play/decor
+        play/decor/base
 #        ${CMAKE_SOURCE_DIR}/util
 )
 
@@ -26,10 +27,10 @@ file(GLOB src-files
         ${CMAKE_SOURCE_DIR}/play/*.h
         ${CMAKE_SOURCE_DIR}/utils/*.cpp
         ${CMAKE_SOURCE_DIR}/utils/*.h
-
         ${CMAKE_SOURCE_DIR}/play/decor/*.cpp
         ${CMAKE_SOURCE_DIR}/play/decor/*.h
-
+        ${CMAKE_SOURCE_DIR}/play/decor/base/*.cpp
+        ${CMAKE_SOURCE_DIR}/play/decor/base/*.h
         )
 
 add_library( # Sets the name of the library.

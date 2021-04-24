@@ -23,7 +23,7 @@
         android:layout_height="50dp"
         android:gravity="center"
         android:onClick="open"
-        android:text="加载资源"
+        android:text="初始化资源"
         tools:ignore="OnClick"></Button>
 
     <Button
@@ -39,7 +39,7 @@
         android:layout_height="50dp"
         android:gravity="center"
         android:onClick="playMp3"
-        android:text="播放yinpin"
+        android:text="播放音频"
         tools:ignore="OnClick"></Button>
 
 
