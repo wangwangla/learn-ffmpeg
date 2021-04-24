@@ -19,7 +19,7 @@ extern "C"{
 
 class VideoPlay {
 public:
-    VideoPlay(char *url);
+    VideoPlay(JNIEnv *env,char *url,jobject surface);
 };
 
 

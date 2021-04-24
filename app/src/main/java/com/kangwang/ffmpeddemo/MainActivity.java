@@ -34,4 +34,11 @@ public class MainActivity extends AppCompatActivity {
                 Manifest.permission.WRITE_EXTERNAL_STORAGE,
         }, REQUEST_CODE);
     }
+
+    public void open(View view) {
+        player.play();
+    }
+
+    public void convert(View view) {
+    }
 }

@@ -4,8 +4,11 @@
 
 #include "VideoPlay.h"
 
-VideoPlay::VideoPlay(char *url) {
+VideoPlay::VideoPlay(JNIEnv *env,char *url,jobject surface) {
     LOGCATE("Video play create--------------------");
     VideoDecoder *decoder = new VideoDecoder(url);
-    AudioDecor *audioDecor = new AudioDecor(url);
+    decoder->createWindow(env,surface);
+    decoder->initInstance();
+//    AudioDecor *audioDecor = new AudioDecor(url);
 }
+

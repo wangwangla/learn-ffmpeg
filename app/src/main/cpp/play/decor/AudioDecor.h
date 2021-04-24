@@ -16,10 +16,6 @@ public:
 protected:
     virtual void codingLoop();
     virtual void codingReady();
-    virtual void play();
-    virtual void stop();
-    virtual void pause();
-    virtual void resume();
 
 };
 #endif //FFMPEDDEMO_AUDIODECOR_H
