@@ -14,22 +14,18 @@ public class FFmpegdiaPlayer implements SurfaceHolder.Callback {
     static {
         System.loadLibrary("play");
     }
-    private long playerHandle;
     private SurfaceHolder surfaceHolder;
-    private SurfaceView surfaceView;
-
+    private String path;
     public FFmpegdiaPlayer(SurfaceView surfaceView) {
-        this.surfaceView = surfaceView;
         if (surfaceHolder != null){
             surfaceHolder.removeCallback(this);
         }
         surfaceHolder = surfaceView.getHolder();
         surfaceHolder.addCallback(this);
-        s = Environment.getExternalStorageDirectory().
+        path = Environment.getExternalStorageDirectory().
                 getAbsolutePath() + "/input.mp4";
 
     }
-    String s;
 
     @Override
     public void surfaceCreated(@NonNull SurfaceHolder holder) {
@@ -45,9 +41,13 @@ public class FFmpegdiaPlayer implements SurfaceHolder.Callback {
 
     public void play(){
 //        player(s,surfaceHolder.getSurface());
-        initPlay(s,surfaceHolder.getSurface());
+//        initPlay(path,surfaceHolder.getSurface());
 //        player(s);
+        playMp3();
+        
     }
+
+    private native void playMp3();
 
     @Override
     public void surfaceDestroyed(@NonNull SurfaceHolder holder) {
@@ -87,4 +87,5 @@ public class FFmpegdiaPlayer implements SurfaceHolder.Callback {
     }
 
     private AudioTrack audioTrack;
+
 }

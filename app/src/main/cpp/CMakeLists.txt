@@ -65,4 +65,5 @@ target_link_libraries( # Specifies the target library.
         ${native-libs}
         android
         z
+        OpenSLES
         )
