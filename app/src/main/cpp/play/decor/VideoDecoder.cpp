@@ -101,12 +101,4 @@ VideoDecoder::~VideoDecoder() {
 
 void VideoDecoder::createWindow(JNIEnv *env,jobject surface) {
     nativeWindow = ANativeWindow_fromSurface(env,surface);
-    if(nativeWindow) {
-        LOGCATE("success");
-    } else{
-        LOGCATE("error");
-    }
-    LOGCATE("native init");
-    long saa = reinterpret_cast<long>(nativeWindow);
-    const char *sa = reinterpret_cast<const char *>(reinterpret_cast<jstring>(saa));
 }
