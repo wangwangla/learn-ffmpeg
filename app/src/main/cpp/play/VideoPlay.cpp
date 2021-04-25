@@ -10,7 +10,7 @@ VideoPlay::VideoPlay(JNIEnv *env,char *url,jobject surface,jobject instance) {
     VideoDecoder *decoder = new VideoDecoder(url);
     decoder->createWindow(env,surface);
     decoder->initInstance();
-//    AudioDecor *audioDecor = new AudioDecor(env,instance,url);
-    AudioDemo *audioDemo = new AudioDemo();
+    AudioDecor *audioDecor = new AudioDecor(env,instance,url);
+//    AudioDemo *audioDemo = new AudioDemo();
 }
 
