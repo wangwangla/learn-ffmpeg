@@ -2,6 +2,8 @@
 // Created by 28188 on 2021/4/24.
 //
 
+#include <SLES/OpenSLES_Android.h>
+#include <SLES/OpenSLES.h>
 #include "AudioDemo.h"
 #include "../../include/libavformat/avformat.h"
 #include "../../include/libavutil/frame.h"
@@ -11,19 +13,11 @@ extern "C"{
 #include "../../include/libavcodec/avcodec.h"
 };
 
-AVFormatContext *pFormatCtx;
-AVCodecContext *pCodecCtx;
-AVCodec *pCodex;
-AVPacket *packet;
-AVFrame *frame;
-SwrContext *swrContext;
-uint8_t *out_buffer;
-int out_channer_nb;
-int audio_stream_idx=-1;
+AudioDemo *audioDemo;
 //opensl es调用 int * rate,int *channel
-int createFFmpeg(int *rate,int *channel){
+int AudioDemo::createFFmpeg(int *rate,int *channel){
     av_register_all();
-    char *input = "/sdcard/1.mp3";
+    char *input = "/sdcard/input.mp4";
     pFormatCtx = avformat_alloc_context();
     LOGE("Lujng %s",input);
     LOGE("xxx %p",pFormatCtx);
@@ -96,7 +90,7 @@ int createFFmpeg(int *rate,int *channel){
     return 0;
 }
 //
-int getPcm(void **pcm,size_t *pcm_size){
+int AudioDemo::getPcm(void **pcm,size_t *pcm_size){
     int frameCount=0;
     int got_frame;
     while (av_read_frame(pFormatCtx, packet) >= 0) {
@@ -123,11 +117,98 @@ int getPcm(void **pcm,size_t *pcm_size){
 }
 
 
-void realseFFmpeg(){
-    av_free_packet(packet);
-    av_free(out_buffer);
-    av_frame_free(&frame);
-    swr_free(&swrContext);
-    avcodec_close(pCodecCtx);
-    avformat_close_input(&pFormatCtx);
+//void realseFFmpeg(){
+//    av_free_packet(packet);
+//    av_free(out_buffer);
+//    av_frame_free(&frame);
+//    swr_free(&swrContext);
+//    avcodec_close(pCodecCtx);
+//    avformat_close_input(&pFormatCtx);
+//}
+
+
+//将pcm数据添加到缓冲区中
+void AudioDemo::getQueueCallBack(SLAndroidSimpleBufferQueueItf  slBufferQueueItf, void* context){
+//    if (audioDemo==NULL){
+        audioDemo->xx();
+//    }
+}
+
+void AudioDemo::xx() {
+    buffersize=0;
+    getPcm(&buffer,&buffersize);
+    if(buffer!=NULL&&buffersize!=0){
+        //将得到的数据加入到队列中
+        (*slBufferQueueItf)->Enqueue(slBufferQueueItf,buffer,buffersize);
+    }
+}
+//创建引擎
+void AudioDemo::createEngine(){
+    slCreateEngine(&engineObject,0,NULL,0,NULL,NULL);//创建引擎
+    (*engineObject)->Realize(engineObject,SL_BOOLEAN_FALSE);//实现engineObject接口对象
+    (*engineObject)->GetInterface(engineObject,SL_IID_ENGINE,&engineEngine);//通过引擎调用接口初始化SLEngineItf
+}
+
+//创建混音器
+void AudioDemo::createMixVolume(){
+    (*engineEngine)->CreateOutputMix(engineEngine,&outputMixObject,0,0,0);//用引擎对象创建混音器接口对象
+    (*outputMixObject)->Realize(outputMixObject,SL_BOOLEAN_FALSE);//实现混音器接口对象
+    SLresult   sLresult = (*outputMixObject)->GetInterface(outputMixObject,SL_IID_ENVIRONMENTALREVERB,&outputMixEnvironmentalReverb);//利用混音器实例对象接口初始化具体的混音器对象
+    //设置
+    if (SL_RESULT_SUCCESS == sLresult) {
+        (*outputMixEnvironmentalReverb)->
+                SetEnvironmentalReverbProperties(outputMixEnvironmentalReverb, &settings);
+    }
+}
+
+//创建播放器
+void AudioDemo::createPlayer(){
+    //初始化ffmpeg
+    int rate;
+    int channels;
+    createFFmpeg(&rate,&channels);
+    LOGE("RATE %d",rate);
+    LOGE("channels %d",channels);
+    SLDataLocator_AndroidBufferQueue android_queue = {SL_DATALOCATOR_ANDROIDSIMPLEBUFFERQUEUE,2};
+    /**
+    typedef struct SLDataFormat_PCM_ {
+        SLuint32 		formatType;  pcm
+        SLuint32 		numChannels;  通道数
+        SLuint32 		samplesPerSec;  采样率
+        SLuint32 		bitsPerSample;  采样位数
+        SLuint32 		containerSize;  包含位数
+        SLuint32 		channelMask;     立体声
+        SLuint32		endianness;    end标志位
+    } SLDataFormat_PCM;
+     */
+    SLDataFormat_PCM pcm = {SL_DATAFORMAT_PCM,static_cast<SLuint32>(channels),
+                            static_cast<SLuint32>(rate*1000)
+            ,SL_PCMSAMPLEFORMAT_FIXED_16
+            ,SL_PCMSAMPLEFORMAT_FIXED_16
+            ,SL_SPEAKER_FRONT_LEFT|SL_SPEAKER_FRONT_RIGHT,SL_BYTEORDER_LITTLEENDIAN};
+    SLDataSource dataSource = {&android_queue,&pcm};
+    SLDataLocator_OutputMix slDataLocator_outputMix={SL_DATALOCATOR_OUTPUTMIX,outputMixObject};
+    SLDataSink slDataSink = {&slDataLocator_outputMix,NULL};
+    const SLInterfaceID ids[3]={SL_IID_BUFFERQUEUE,SL_IID_EFFECTSEND,SL_IID_VOLUME};
+    const SLboolean req[3]={SL_BOOLEAN_FALSE,SL_BOOLEAN_FALSE,SL_BOOLEAN_FALSE};
+    LOGE("执行到此处");
+    (*engineEngine)->CreateAudioPlayer(engineEngine,&audioplayer,&dataSource,&slDataSink,3,ids,req);
+    (*audioplayer)->Realize(audioplayer,SL_BOOLEAN_FALSE);
+    LOGE("执行到此处2");
+    (*audioplayer)->GetInterface(audioplayer,SL_IID_PLAY,&slPlayItf);//初始化播放器
+    //注册缓冲区,通过缓冲区里面 的数据进行播放
+    (*audioplayer)->GetInterface(audioplayer,SL_IID_BUFFERQUEUE,&slBufferQueueItf);
+    //设置回调接口
+    (*slBufferQueueItf)->RegisterCallback(slBufferQueueItf,getQueueCallBack,NULL);
+    //播放
+    (*slPlayItf)->SetPlayState(slPlayItf,SL_PLAYSTATE_PLAYING);
+    //开始播放
+    getQueueCallBack(slBufferQueueItf,NULL);
+}
+
+AudioDemo ::AudioDemo() {
+    audioDemo = this;
+    createEngine();
+    createMixVolume();
+    createPlayer();
 }

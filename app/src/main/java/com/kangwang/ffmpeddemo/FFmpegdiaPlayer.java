@@ -41,9 +41,9 @@ public class FFmpegdiaPlayer implements SurfaceHolder.Callback {
 
     public void play(){
 //        player(s,surfaceHolder.getSurface());
-//        initPlay(path,surfaceHolder.getSurface());
+        initPlay(path,surfaceHolder.getSurface());
 //        player(s);
-        playMp3();
+//        playMp3();
         
     }
 
