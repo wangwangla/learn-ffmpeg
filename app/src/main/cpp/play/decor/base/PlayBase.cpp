@@ -27,7 +27,7 @@ void PlayBase::init() {
         LOGCATE("open file success");
     }
 
-    avformat_find_stream_info(formatContext,NULL); //读取成功    读取视频流  解析出来
+    avformat_find_stream_info(formatContext,NULL); //读取数据流信息   读取视频流  解析出来
 
     //便利
     for(int i= 0; i<formatContext->nb_streams;i++){
