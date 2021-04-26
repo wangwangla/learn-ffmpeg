@@ -2403,6 +2403,17 @@ int av_find_best_stream(AVFormatContext *ic,
  * provide them). pkt->pts can be AV_NOPTS_VALUE if the video format
  * has B-frames, so it is better to rely on pkt->dts if you do not
  * decompress the payload.
+ * *返回流的下一帧。 *此函数返回文件中存储的内容，并且不验证*解码器是否存在有效帧。
+ * 它将把文件中存储的*分割为几帧，并为每次调用返回一个。它不会*忽略有效帧之间的无效数据，
+ * 以便为解码器提供最大可能的解码信息。 * *如果pkt-> buf为NULL，
+ * 则该数据包在下一个av_read_frame（）或avformat_close_input（）之前一直有效。否则，
+ * 数据包*无限期有效。在这两种情况下，当不再需要包时，都必须使用* av_packet_unref释放它。
+ * 对于视频，数据包仅包含*一帧。对于音频，如果每个*帧具有已知的固定大小
+ * （例如PCM或ADPCM数据），则它包含整数个帧。如果音频帧*具有可变大小（例如MPEG音频），
+ * 则它包含一帧。 * *始终将pkt-> pts，pkt-> dts和pkt-> duration设置为正确
+ * * AVStream.time_base单位中的值（并猜测格式是否不能提供它们）。如果视频格
+ * 式*具有B帧，则pkt-> pts可以为AV_NOPTS_VALUE，因此，如果不*对有效载荷进行解
+ * 压缩，则最好依靠pkt-> dts。
  *
  * @return 0 if OK, < 0 on error or end of file
  */

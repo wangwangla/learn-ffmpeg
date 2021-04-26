@@ -7,7 +7,6 @@
 
 #include <SLES/OpenSLES.h>
 #include <SLES/OpenSLES_Android.h>
-#include <decor/AudioDemo.h>
 
 extern "C" {
 #include <android/native_window_jni.h>
@@ -23,26 +22,30 @@ extern "C" {
 #include <libavformat/avformat.h>
 #include <libswresample/swresample.h>
 };
-#define MAX_AUDIO_FRME_SIZE 48000 * 4
 using namespace std;
-//测试环境
-extern "C"
-JNIEXPORT jstring JNICALL
+
+extern "C" {
+
+    JNIEXPORT jstring JNICALL
 Java_com_kangwang_ffmpeddemo_FFmpegdiaPlayer_native_1version(JNIEnv *env, jobject thiz) {
     string hello = av_version_info();
     string avutil = to_string(avutil_version());
     hello.append(avutil);
     LOGCATI("avutil");
     return env->NewStringUTF(hello.c_str());
-}extern "C"
+}
+
 JNIEXPORT jlong JNICALL
 Java_com_kangwang_ffmpeddemo_FFmpegdiaPlayer_initPlay(JNIEnv *env, jobject thiz, jstring path,
                                                       jobject surface) {
     char *input = const_cast<char *>(env->GetStringUTFChars(path, 0));
-    VideoPlay *videoPlay = new VideoPlay(env,input,surface,thiz);
+    VideoPlay *videoPlay = new VideoPlay(env, input, surface, thiz);
     return reinterpret_cast<jlong>(videoPlay);
-}extern "C"
+}
+
+extern "C"
 JNIEXPORT void JNICALL
 Java_com_kangwang_ffmpeddemo_FFmpegdiaPlayer_playMp3(JNIEnv *env, jobject thiz) {
-    AudioDemo *audioDemo = new AudioDemo();
+
 }
+};

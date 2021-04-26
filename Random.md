@@ -157,3 +157,209 @@ for(int i= 0; i<formatContext->nb_streams;i++){
 nativeWindow = ANativeWindow_fromSurface(env,surface);
 ```
 
+2.对流进行分析
+
+- 得到视频流的参数
+- 根据ID得到解码器
+- 得到解码器上下文
+- 将参数复制到上下文中
+- 使用上下文打开文件
+- 数据是由一个一个的packet组成的，我们创建一个容器
+- 读取视频流
+- 给窗口设置内存缓存
+
+```java
+OGCATE("init_video decoder");
+    //得到流的参数
+AVCodecParameters *parameters = formatContext->streams[video_stream_index]->codecpar;
+LOGCATE("find stream");
+//我们现在对流进行解码   使用解码器的id  得到解码器
+aVCodec = avcodec_find_decoder(parameters->codec_id);
+//创建解码器 的上下文
+avCodecContext = avcodec_alloc_context3(aVCodec);
+
+LOGCATE("avCodeContext");
+//将解码器的 参数复制到 上下文
+avcodec_parameters_to_context(avCodecContext,parameters);
+avcodec_open2(avCodecContext,aVCodec,NULL);
+avPacket = av_packet_alloc(); //比如H.264压缩数据
+LOGCATE("getAvpackk");
+swsContext =//    读取视频流
+    sws_getContext(
+    avCodecContext->width,
+    avCodecContext->height,
+    avCodecContext->pix_fmt,
+    avCodecContext->width,
+    avCodecContext->height,
+    AV_PIX_FMT_RGBA,
+    SWS_BILINEAR,0,0,0);
+LOGCATE("dis[lay begin");
+ANativeWindow_setBuffersGeometry(
+    nativeWindow,
+    avCodecContext->width,
+    avCodecContext->height,
+    WINDOW_FORMAT_RGBA_8888);
+LOGCATE("displey end");
+```
+
+3.进行播放
+
+- 参数 
+  - 可以获取时间   
+  - 获取名称
+  - 从format中获取packet
+
+```
+long time = formatContext->duration; //获取的是微秒    10  6次方
+string name = formatContext->iformat->name;
+//读取每一帧的 数据    数据帧   avpacket   frame
+while (av_read_frame(formatContext, avPacket) >= 0){
+    //将数据放入 到解码器中
+    avcodec_send_packet(avCodecContext,avPacket);
+    AVFrame  *frame = av_frame_alloc();  
+    //解码之后的数据  frame
+    int ret = avcodec_receive_frame(avCodecContext,frame);
+    if (ret == AVERROR(EAGAIN)){
+        continue;
+    } else if (ret<0){
+        break;
+    }
+
+    //将yuv转化为RGB
+    uint8_t  *dst_data[4];
+    int dst_linesize[4];
+    av_image_alloc(dst_data,
+            dst_linesize,
+            avCodecContext->width,
+            avCodecContext->height,
+            AV_PIX_FMT_RGBA,
+            1);
+    sws_scale(swsContext,frame->data,frame->linesize,0,frame->height,dst_data,dst_linesize);
+    ANativeWindow_lock(nativeWindow,&outBuffer,NULL);
+    uint8_t *fistWindown = static_cast<uint8_t *>(outBuffer.bits);
+    uint8_t *src_data = dst_data[0];
+    int destStride = outBuffer.stride *4;
+    int src_linesize = dst_linesize[0];
+    for(int  i=0;i<outBuffer.height;i++){
+        memcpy(fistWindown+i*destStride,src_data+i*src_linesize,destStride);
+    }
+    ANativeWindow_unlockAndPost(nativeWindow);
+    LOGCATE("显示----");
+}
+```
+
+## 音频播放
+
+1.创建引擎
+
+```java
+slCreateEngine(&engineObject,0,NULL,0,NULL,NULL);//创建引擎
+(*engineObject)->Realize(engineObject,SL_BOOLEAN_FALSE);//实现engineObject接口对象
+(*engineObject)->GetInterface(engineObject,SL_IID_ENGINE,&engineEngine);//通过引擎调用接口初始化SLEngineItf
+```
+
+2.创建混音
+
+```
+void AudioDecor::createMixVolume(){
+    (*engineEngine)->CreateOutputMix(engineEngine,&outputMixObject,0,0,0);//用引擎对象创建混音器接口对象
+    (*outputMixObject)->Realize(outputMixObject,SL_BOOLEAN_FALSE);//实现混音器接口对象
+    SLresult   sLresult = (*outputMixObject)->GetInterface(outputMixObject,SL_IID_ENVIRONMENTALREVERB,&outputMixEnvironmentalReverb);//利用混音器实例对象接口初始化具体的混音器对象
+    //设置
+    if (SL_RESULT_SUCCESS == sLresult) {
+        (*outputMixEnvironmentalReverb)->
+                SetEnvironmentalReverbProperties(outputMixEnvironmentalReverb, &settings);
+    }
+}
+```
+
+3.创建播放器
+
+```
+void AudioDecor::createPlayer(){
+    //初始化ffmpeg
+    int rate;
+    int channels;
+    createFFmpeg(&rate,&channels);
+    LOGE("RATE %d",rate);
+    LOGE("channels %d",channels);
+    SLDataLocator_AndroidBufferQueue android_queue = {SL_DATALOCATOR_ANDROIDSIMPLEBUFFERQUEUE,2};
+    /**
+    typedef struct SLDataFormat_PCM_ {
+        SLuint32      formatType;  pcm
+        SLuint32      numChannels;  通道数
+        SLuint32      samplesPerSec;  采样率
+        SLuint32      bitsPerSample;  采样位数
+        SLuint32      containerSize;  包含位数
+        SLuint32      channelMask;     立体声
+        SLuint32      endianness;    end标志位
+    } SLDataFormat_PCM;
+     */
+    SLDataFormat_PCM pcm = {SL_DATAFORMAT_PCM,static_cast<SLuint32>(channels),
+                            static_cast<SLuint32>(rate*1000)
+            ,SL_PCMSAMPLEFORMAT_FIXED_16
+            ,SL_PCMSAMPLEFORMAT_FIXED_16
+            ,SL_SPEAKER_FRONT_LEFT|SL_SPEAKER_FRONT_RIGHT,SL_BYTEORDER_LITTLEENDIAN};
+    SLDataSource dataSource = {&android_queue,&pcm};
+    SLDataLocator_OutputMix slDataLocator_outputMix={SL_DATALOCATOR_OUTPUTMIX,outputMixObject};
+    SLDataSink slDataSink = {&slDataLocator_outputMix,NULL};
+    const SLInterfaceID ids[3]={SL_IID_BUFFERQUEUE,SL_IID_EFFECTSEND,SL_IID_VOLUME};
+    const SLboolean req[3]={SL_BOOLEAN_FALSE,SL_BOOLEAN_FALSE,SL_BOOLEAN_FALSE};
+    LOGE("执行到此处");
+    (*engineEngine)->CreateAudioPlayer(engineEngine,&audioplayer,&dataSource,&slDataSink,3,ids,req);
+    (*audioplayer)->Realize(audioplayer,SL_BOOLEAN_FALSE);
+    LOGE("执行到此处2");
+    (*audioplayer)->GetInterface(audioplayer,SL_IID_PLAY,&slPlayItf);//初始化播放器
+    //注册缓冲区,通过缓冲区里面 的数据进行播放
+    (*audioplayer)->GetInterface(audioplayer,SL_IID_BUFFERQUEUE,&slBufferQueueItf);
+    //设置回调接口
+    (*slBufferQueueItf)->RegisterCallback(slBufferQueueItf,getQueueCallBack,NULL);
+    //播放
+    (*slPlayItf)->SetPlayState(slPlayItf,SL_PLAYSTATE_PLAYING);
+    //开始播放
+    getQueueCallBack(slBufferQueueItf,NULL);
+}
+```
+
+4.播放
+
+```
+void AudioDecor::xx() {
+    buffersize=0;
+    getPcm(&buffer,&buffersize);
+    if(buffer!=NULL&&buffersize!=0){
+        //将得到的数据加入到队列中
+        (*slBufferQueueItf)->Enqueue(slBufferQueueItf,buffer,buffersize);
+    }
+}
+
+int AudioDecor::getPcm(void **pcm,size_t *pcm_size){
+    int frameCount=0;
+    int got_frame;
+    while (av_read_frame(formatContext, packet) >= 0) {
+        if (packet->stream_index == audeo_stream_index) {
+//            解码  mp3   编码格式frame----pcm   frame
+            avcodec_decode_audio4(pCodecCtx, frame, &got_frame, packet);
+            if (got_frame) {
+                LOGE("解码");
+                /**
+                 * int swr_convert(struct SwrContext *s, uint8_t **out, int out_count,
+                                const uint8_t **in , int in_count);
+                 */
+                swr_convert(swrContext, &out_buffer,
+                        44100 * 2, (const uint8_t **) frame->data, frame->nb_samples);
+//                缓冲区的大小
+                int size = av_samples_get_buffer_size(NULL,
+                        out_channer_nb, frame->nb_samples,
+                                                      AV_SAMPLE_FMT_S16, 1);
+                *pcm = out_buffer;
+                *pcm_size = size;
+                break;
+            }
+        }
+    }
+    return 0;
+}
+```
+
+## 同步
