@@ -16,6 +16,7 @@ public class FFmpegdiaPlayer implements SurfaceHolder.Callback {
     }
     private SurfaceHolder surfaceHolder;
     private String path;
+    private String outPath;
     public FFmpegdiaPlayer(SurfaceView surfaceView) {
         if (surfaceHolder != null){
             surfaceHolder.removeCallback(this);
@@ -23,8 +24,9 @@ public class FFmpegdiaPlayer implements SurfaceHolder.Callback {
         surfaceHolder = surfaceView.getHolder();
         surfaceHolder.addCallback(this);
         path = Environment.getExternalStorageDirectory().
-                getAbsolutePath() + "/input.mp4";
-
+                getAbsolutePath() + "/1.mp3";
+        outPath = Environment.getExternalStorageDirectory().
+                getAbsolutePath()+"/55.pcm";
     }
 
     @Override
@@ -41,13 +43,14 @@ public class FFmpegdiaPlayer implements SurfaceHolder.Callback {
 
     public void play(){
 //        player(s,surfaceHolder.getSurface());
-        initPlay(path,surfaceHolder.getSurface());
+//        initPlay(path,surfaceHolder.getSurface());
 //        player(s);
 //        playMp3();
+        zhuanma(outPath,path);
         
     }
 
-    private native void playMp3();
+    private native void zhuanma(String outPath,String path);
 
     @Override
     public void surfaceDestroyed(@NonNull SurfaceHolder holder) {
