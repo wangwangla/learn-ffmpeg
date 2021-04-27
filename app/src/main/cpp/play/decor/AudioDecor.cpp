@@ -25,8 +25,9 @@ int AudioDecor::createFFmpeg(int *rate,int *channel){
 //    获取音频编解码器   废弃
 //    pCodecCtx=avcodec_find_decoder(avCodecParameters->codec_id);
     LOGE("获取视频编码器上下文 %p  ",pCodecCtx);
-    pCodex = avcodec_find_decoder(pCodecCtx->codec_id);
+    pCodex = avcodec_find_decoder(avCodecParameters->codec_id);
     pCodecCtx = avcodec_alloc_context3(pCodex);
+    avcodec_parameters_to_context(pCodecCtx,avCodecParameters);
     LOGE("获取视频编码 %p",pCodex);
     if (avcodec_open2(pCodecCtx, pCodex, NULL)<0) {
     }
