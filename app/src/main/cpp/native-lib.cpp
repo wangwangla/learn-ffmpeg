@@ -35,28 +35,22 @@ int framecnt = 0;
 int open_input_file(const char *filename, AVFormatContext **input_format_context, AVCodecContext **input_codec_context){
     AVCodec *input_codec;
     int error;
-    /** Open the input file to read from it. */
-    if ((error = avformat_open_input(input_format_context, filename, NULL,
-                                     NULL)) < 0) {
-//        fprintf(stderr, "Could not open input file '%s' (error '%s')\n",
-//                filename, get_error_text(error));
+    /** 打开文件， 设置format参数*/
+    if ((error = avformat_open_input(input_format_context, filename, NULL,NULL)) < 0) {
         *input_format_context = NULL;
         return error;
     }
     LOGCATE("打开文件");
-    /** Get information on the input file (number of streams etc.). */
+    /** 读取流信息.   将流设置到format里 */
     if ((error = avformat_find_stream_info(*input_format_context, NULL)) < 0) {
-//        fprintf(stderr, "Could not open find stream info (error '%s')\n",
-//                get_error_text(error));
         avformat_close_input(input_format_context);
         return error;
     }
     LOGCATE("找流");
-
     int  index = 0;
     int xxx = 0;
+    //遍历所有的流信息  找出音频流下标
     for (index = 0; index <(*input_format_context)->nb_streams; index++) {
-
         AVStream *stream = (*input_format_context)->streams[index];
         AVCodecContext *code = stream->codec;
         if (code->codec_type == AVMEDIA_TYPE_AUDIO){
@@ -65,34 +59,30 @@ int open_input_file(const char *filename, AVFormatContext **input_format_context
         }
     }
 
-
     /** Find a decoder for the audio stream. */
+    /** 通过音频流找解码器. */
     if (!(input_codec = avcodec_find_decoder((*input_format_context)->streams[xxx]->codec->codec_id))) {
         fprintf(stderr, "Could not find input codec\n");
         avformat_close_input(input_format_context);
         return AVERROR_EXIT;
     }
+
+    /** Find a decoder for the audio stream. */
+    /** 解码器找到了   正式的打开流文件. */
     LOGCATE("input  for mcontext",input_codec_context);
-    /** Open the decoder for the audio stream to use it later. */
-    if ((error = avcodec_open2((*input_format_context)->streams[xxx]->codec,
-                               input_codec, NULL)) < 0) {
+    if ((error = avcodec_open2((*input_format_context)->streams[xxx]->codec,input_codec, NULL)) < 0) {
         fprintf(stderr, "Could not open input codec (error '%s')\n",(error));
         avformat_close_input(input_format_context);
         return error;
     }
     LOGCATE("input  for mcontext11111111",input_codec_context);
     /** Save the decoder context for easier access later. */
+    /** 流的上下文*/
     *input_codec_context = (*input_format_context)->streams[0]->codec;
-
     return 0;
-
-
 }
 
-int open_output_file(const char *filename,
-                     AVCodecContext *input_codec_context,
-                     AVFormatContext **output_format_context,
-                     AVCodecContext **output_codec_context)
+int open_output_file(const char *filename,AVCodecContext *input_codec_context,AVFormatContext **output_format_context,AVCodecContext **output_codec_context)
 {
     AVIOContext *output_io_context = NULL;
     AVStream *stream = NULL;
@@ -182,14 +172,17 @@ int init_resampler(AVCodecContext *input_codec_context,
     int error;
 
     *resample_context = swr_alloc_set_opts(NULL,
-                                           av_get_default_channel_layout(output_codec_context->channels), output_codec_context->sample_fmt, output_codec_context->sample_rate,
-                                           av_get_default_channel_layout(input_codec_context->channels), input_codec_context->sample_fmt, input_codec_context->sample_rate,
+                                           av_get_default_channel_layout(output_codec_context->channels),
+                                           output_codec_context->sample_fmt,
+                                           output_codec_context->sample_rate,
+                                           av_get_default_channel_layout(input_codec_context->channels),
+                                           input_codec_context->sample_fmt,
+                                           input_codec_context->sample_rate,
                                            0, NULL);
     if (!*resample_context) {
         fprintf(stderr, "Could not allocate resample context\n");
         return AVERROR(ENOMEM);
     }
-
     if ((error = swr_init(*resample_context)) < 0) {
         fprintf(stderr, "Could not open resample context\n");
         swr_free(resample_context);
@@ -253,56 +246,39 @@ int encode_audio_frame(AVFrame *frame,int nbsamples,
     return 0;
 }
 
+/**
+实现步骤：
+1.先将音频进行解码
+2.将pcm放入队列中，然后从队列中取出，重新编码
+*/
 extern "C"
 JNIEXPORT void JNICALL
-Java_com_kangwang_ffmpeddemo_FFmpegdiaPlayer_zhuanma(JNIEnv
-* env,
-jobject thiz,
-jstring outpath,
-jstring path
-) {
-        const char *out_file = env->GetStringUTFChars(outpath, 0);
-        const char *infile = env->GetStringUTFChars(path, 0);
-
+Java_com_kangwang_ffmpeddemo_FFmpegdiaPlayer_zhuanma(JNIEnv * env,jobject thiz,jstring outpath,jstring path) {
+    const char *out_file = env->GetStringUTFChars(outpath, 0);
+    const char *infile = env->GetStringUTFChars(path, 0);
     av_register_all();
-
+    //编码格式上下文
     AVFormatContext *input_format_context = NULL, *output_format_context = NULL;
+    //编码器上下文
     AVCodecContext *input_codec_context = NULL, *output_codec_context = NULL;
     SwrContext *resample_context = NULL;
     AVAudioFifo* audiofifo = NULL;
-
+    //可以理解为  上下文设置值
     /** Open the input file for reading. */
     open_input_file(infile, &input_format_context, &input_codec_context);
-
-//        goto cleanup;
+    //        goto cleanup;
     /** Open the output file for writing. */
-    open_output_file(out_file, input_codec_context,
-                         &output_format_context, &output_codec_context);
-//        goto cleanup;
-
-    LOGCATE("-----------sslllllllllll %s",input_codec_context);
-    LOGCATE("-----------ss222222 %s",output_codec_context);
-//    LOGCATE("-----------ss333333 %s",resample_context);
-
-
-    /** Initialize the resampler to be able to convert audio sample formats. */
+    open_output_file(out_file, input_codec_context,&output_format_context, &output_codec_context);
+    //设置采样参数
     init_resampler(input_codec_context, output_codec_context, &resample_context);
-//        goto cleanup;
-
-    LOGCATE("-----------ss222222222222222");
-
     //Write Header
     avformat_write_header(output_format_context, NULL);
-
     int out_framesize = output_codec_context->frame_size;
     AVSampleFormat out_sample_fmt = output_codec_context->sample_fmt;
     int out_channels = av_get_channel_layout_nb_channels(output_codec_context->channel_layout);
-
     audiofifo = av_audio_fifo_alloc(out_sample_fmt, out_channels, 1);
-
     int readFinished = 0;
     while (1){
-        LOGCATE("-----------sslllllllllll");
         while (av_audio_fifo_size(audiofifo) < out_framesize){
             AVPacket input_packet;
             init_packet(&input_packet);
@@ -311,13 +287,12 @@ jstring path
                 uint8_t ** audio_data_buffer = NULL;
                 int got_frame = 0;
                 avcodec_decode_audio4(input_codec_context, input_frame, &got_frame, &input_packet);
-
                 if (got_frame){
+                //开辟一个空间   用来存储
                     av_samples_alloc_array_and_samples(&audio_data_buffer, NULL, out_channels, input_frame->nb_samples, out_sample_fmt, 1);
                     //这里的out nb_samples 必须传输入采样数
                     int convert_nb_samples = swr_convert(resample_context, audio_data_buffer, input_frame->nb_samples,
                                                          (const uint8_t**)input_frame->data, input_frame->nb_samples);
-
                     av_audio_fifo_realloc(audiofifo, av_audio_fifo_size(audiofifo) + input_frame->nb_samples);
                     av_audio_fifo_write(audiofifo, (void **)audio_data_buffer, input_frame->nb_samples);
 
@@ -327,18 +302,14 @@ jstring path
                 if (audio_data_buffer) {
                     av_free(audio_data_buffer[0]);
                     av_free(audio_data_buffer);
-
                 }
             }else{
                 readFinished = 1;
                 av_free_packet(&input_packet);
                 break;
             }
-
         }
-
         while (av_audio_fifo_size(audiofifo) >= out_framesize || (readFinished&&av_audio_fifo_size(audiofifo)>0)){
-
             int frame_size = FFMIN(av_audio_fifo_size(audiofifo), out_framesize);
             AVFrame* output_frame = NULL;
             output_frame = av_frame_alloc();
@@ -346,24 +317,19 @@ jstring path
             output_frame->channel_layout = output_codec_context->channel_layout;
             output_frame->format = output_codec_context->sample_fmt;
             output_frame->sample_rate = output_codec_context->sample_rate;
-
             av_frame_get_buffer(output_frame, 0);
             av_audio_fifo_read(audiofifo, (void **)output_frame->data, frame_size);
-
             encode_audio_frame(output_frame, frame_size, output_format_context, output_codec_context);
-
         }
-
         if (readFinished){
-
             if (output_codec_context->codec->capabilities &AV_CODEC_CAP_DELAY){
                 while (!encode_audio_frame(NULL, out_framesize, output_format_context, output_codec_context)){ ; }
             }
             break;
         }
-
     }
 
+//  末尾写入音轨，可以拖动控制位置
     if (av_write_trailer(output_format_context) < 0) {
         printf("Could not write output file trailer (error '%s')\n");
 //        goto cleanup;
