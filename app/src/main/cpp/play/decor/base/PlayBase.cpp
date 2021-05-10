@@ -4,7 +4,6 @@
 
 extern "C"{
 #include <libavformat/avformat.h>
-
 };
 #include <LogUtils.h>
 #include "PlayBase.h"

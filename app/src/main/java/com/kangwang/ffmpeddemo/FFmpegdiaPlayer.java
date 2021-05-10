@@ -24,9 +24,9 @@ public class FFmpegdiaPlayer implements SurfaceHolder.Callback {
         surfaceHolder = surfaceView.getHolder();
         surfaceHolder.addCallback(this);
         path = Environment.getExternalStorageDirectory().
-                getAbsolutePath() + "/1.mp3";
+                getAbsolutePath() + "/55.aac";
         outPath = Environment.getExternalStorageDirectory().
-                getAbsolutePath()+"/55.pcm";
+                getAbsolutePath()+"/55.mp3";
     }
 
     @Override

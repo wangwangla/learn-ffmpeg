@@ -78,7 +78,8 @@ int open_input_file(const char *filename, AVFormatContext **input_format_context
     LOGCATE("input  for mcontext11111111",input_codec_context);
     /** Save the decoder context for easier access later. */
     /** 流的上下文*/
-    *input_codec_context = (*input_format_context)->streams[0]->codec;
+    *input_codec_context = (*input_format_context)->streams[xxx]->codec;
+    LOGCATE("-jfdfdhfjdfdffddfffddd");
     return 0;
 }
 
@@ -111,8 +112,8 @@ int open_output_file(const char *filename,AVCodecContext *input_codec_context,AV
                sizeof((*output_format_context)->filename));
 
     /** Find the encoder to be used by its name. */
-    if (!(output_codec = avcodec_find_encoder(AV_CODEC_ID_AAC))) {
-        fprintf(stderr, "Could not find an AAC encoder.\n");
+    if (!(output_codec = avcodec_find_encoder(AV_CODEC_ID_MP3ON4))) {
+        LOGCATE("Could not find an AAC encoder.\n");
         goto cleanup;
     }
     LOGCATE("000000000000000000000");
@@ -151,10 +152,14 @@ int open_output_file(const char *filename,AVCodecContext *input_codec_context,AV
     if ((*output_format_context)->oformat->flags & AVFMT_GLOBALHEADER)
         (*output_codec_context)->flags |= AV_CODEC_FLAG_GLOBAL_HEADER;
 
+
+    LOGCATE("000000000000000000000");
     /** Open the encoder for the audio stream to use it later. */
     if ((error = avcodec_open2(*output_codec_context, output_codec, NULL)) < 0) {
 //        fprintf(stderr, "Could not open output codec (error '%s')\n",
 //                get_error_text(error));
+
+        LOGCATE("000000000000000000000 %s",error);
         goto cleanup;
     }
 

@@ -119,7 +119,13 @@ void AudioDecor::xx() {
 }
 //创建引擎
 void AudioDecor::createEngine(){
-    slCreateEngine(&engineObject,0,NULL,0,NULL,NULL);//创建引擎
+    slCreateEngine(
+            &engineObject,
+            0,
+            NULL,
+            0,
+            NULL,
+            NULL);//创建引擎
     (*engineObject)->Realize(engineObject,SL_BOOLEAN_FALSE);//实现engineObject接口对象
     (*engineObject)->GetInterface(engineObject,SL_IID_ENGINE,&engineEngine);//通过引擎调用接口初始化SLEngineItf
 }
@@ -144,7 +150,8 @@ void AudioDecor::createPlayer(){
     createFFmpeg(&rate,&channels);
     LOGE("RATE %d",rate);
     LOGE("channels %d",channels);
-    SLDataLocator_AndroidBufferQueue android_queue = {SL_DATALOCATOR_ANDROIDSIMPLEBUFFERQUEUE,2};
+    SLDataLocator_AndroidBufferQueue android_queue =
+            {SL_DATALOCATOR_ANDROIDSIMPLEBUFFERQUEUE,2};
     /**
     typedef struct SLDataFormat_PCM_ {
         SLuint32 		formatType;  pcm
@@ -156,8 +163,9 @@ void AudioDecor::createPlayer(){
         SLuint32		endianness;    end标志位
     } SLDataFormat_PCM;
      */
-    SLDataFormat_PCM pcm = {SL_DATAFORMAT_PCM,static_cast<SLuint32>(channels),
-                            static_cast<SLuint32>(rate*1000)
+    SLDataFormat_PCM pcm = {
+            SL_DATAFORMAT_PCM,static_cast<SLuint32>(channels),
+            static_cast<SLuint32>(rate*1000)
             ,SL_PCMSAMPLEFORMAT_FIXED_16
             ,SL_PCMSAMPLEFORMAT_FIXED_16
             ,SL_SPEAKER_FRONT_LEFT|SL_SPEAKER_FRONT_RIGHT,SL_BYTEORDER_LITTLEENDIAN};
@@ -166,10 +174,8 @@ void AudioDecor::createPlayer(){
     SLDataSink slDataSink = {&slDataLocator_outputMix,NULL};
     const SLInterfaceID ids[3]={SL_IID_BUFFERQUEUE,SL_IID_EFFECTSEND,SL_IID_VOLUME};
     const SLboolean req[3]={SL_BOOLEAN_FALSE,SL_BOOLEAN_FALSE,SL_BOOLEAN_FALSE};
-    LOGE("执行到此处");
     (*engineEngine)->CreateAudioPlayer(engineEngine,&audioplayer,&dataSource,&slDataSink,3,ids,req);
     (*audioplayer)->Realize(audioplayer,SL_BOOLEAN_FALSE);
-    LOGE("执行到此处2");
     (*audioplayer)->GetInterface(audioplayer,SL_IID_PLAY,&slPlayItf);//初始化播放器
     //注册缓冲区,通过缓冲区里面 的数据进行播放
     (*audioplayer)->GetInterface(audioplayer,SL_IID_BUFFERQUEUE,&slBufferQueueItf);
