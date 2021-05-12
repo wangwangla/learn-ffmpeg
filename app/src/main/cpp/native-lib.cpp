@@ -204,6 +204,8 @@ Java_com_kangwang_ffmpeddemo_FFmpegdiaPlayer_native_1version(JNIEnv *env, jobjec
     LOGCATI("avutil");
     return env->NewStringUTF(hello.c_str());
 }
+
+
 extern "C" jlong
 Java_com_kangwang_ffmpeddemo_FFmpegdiaPlayer_initPlay(JNIEnv *env, jobject thiz, jstring path,
                                                       jobject surface) {

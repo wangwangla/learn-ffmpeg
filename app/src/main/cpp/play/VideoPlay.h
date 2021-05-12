@@ -20,7 +20,12 @@ extern "C"{
 class VideoPlay {
 public:
     VideoPlay(JNIEnv *env,char *url,jobject surface,jobject instance);
+    void saveFrame(AVFrame *pFrame, int width, int height, int iFrame);
+    void runMain(char *url);
+
+    void loadCommon(char *url);
 };
+
 
 
 #endif //LEARNFFMPEG_FFMEDIAPLAYER_H
