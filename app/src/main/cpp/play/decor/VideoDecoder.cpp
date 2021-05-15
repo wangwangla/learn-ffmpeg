@@ -40,7 +40,10 @@ void VideoDecoder::initInstance() {
                     avCodecContext->width,
                     avCodecContext->height,
                     AV_PIX_FMT_RGBA,
-                    SWS_BILINEAR,0,0,0);
+                    SWS_BILINEAR,
+                    0,
+                    0,
+                    0);
     LOGCATE("dis[lay begin");
     ANativeWindow_setBuffersGeometry(
             nativeWindow,

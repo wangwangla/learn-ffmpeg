@@ -67,7 +67,7 @@ void VideoPlay::runMain(char *url) {
         return;
     }
     //找流
-    if(avformat_find_stream_info(avFormatContext,0)<0){
+    if(avformat_find_stream_info(avFormatContext,NULL)<0){
         return;
     }
 
@@ -112,11 +112,12 @@ void VideoPlay::runMain(char *url) {
             avCodecContext->width,
             avCodecContext->height);
     int frameFInished;
-    AVPacket packet;
+    AVPacket *packet = NULL;
+    packet = av_packet_alloc();
     i = 0;
-    while (av_read_frame(avFormatContext,&packet)>=0){
-        if(packet.stream_index == videoStreamIndex){
-            avcodec_decode_video2(avCodecContext,avFrame,&frameFInished,&packet);
+    while (av_read_frame(avFormatContext,packet)>=0){
+        if(packet->stream_index == videoStreamIndex){
+            avcodec_decode_video2(avCodecContext,avFrame,&frameFInished,packet);
             if(frameFInished){
                 SwsContext *img_convert_ctx =
                         sws_getContext(
@@ -137,7 +138,7 @@ void VideoPlay::runMain(char *url) {
                     saveFrame(avFrame1,avCodecContext->width,avCodecContext->height,i);
                 }
             }
-            av_free_packet(&packet);
+            av_free_packet(packet);
         }
     }
     av_free(buffer);
