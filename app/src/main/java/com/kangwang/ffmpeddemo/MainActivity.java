@@ -25,8 +25,8 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         checkPermissions();
-        player = new FFmpegdiaPlayer(findViewById(R.id.surfaceView));
-        System.out.println("current use version"+player.versionInfo());
+//        player = new FFmpegdiaPlayer(findViewById(R.id.surfaceView));
+//        System.out.println("current use version"+player.versionInfo());
     }
 
     private void checkPermissions() {
