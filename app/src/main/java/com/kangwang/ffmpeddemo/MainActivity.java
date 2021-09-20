@@ -42,10 +42,11 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void playMp3(View view) {
+        selectItem(3);
     }
 
     public void convertMp3(View view) {
-        selectItem(3);
+       selectItem(4);
     }
 
     public void readvsersion(View view) {
@@ -69,8 +70,11 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(intent);
                 break;
             }
-
+            case 4:{
+                Intent intent = new Intent(this,ConvertMp3.class);
+                startActivity(intent);
+                break;
+            }
         }
-
     }
 }
