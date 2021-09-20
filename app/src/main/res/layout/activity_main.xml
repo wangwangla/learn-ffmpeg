@@ -6,28 +6,18 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".MainActivity">
-<!--    <SurfaceView-->
-<!--        android:id="@+id/surfaceView"-->
-<!--        android:layout_width="match_parent"-->
-<!--        android:layout_height="200dp">-->
-<!--    </SurfaceView>-->
-    <com.kangwang.ffmpeddemo.play.ffmpegVideoPlay
+    <Button
+        android:text="查看版本"
         android:layout_width="match_parent"
-        android:layout_height="300dp">
-
-    </com.kangwang.ffmpeddemo.play.ffmpegVideoPlay>
-    <SeekBar
-        android:visibility="gone"
-        android:max="100"
-        android:id="@+id/seekbar"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"></SeekBar>
-
+        android:layout_height="50dp"
+        android:onClick="readvsersion"
+        tools:ignore="OnClick">
+    </Button>
     <Button
         android:layout_width="match_parent"
         android:layout_height="50dp"
         android:gravity="center"
-        android:onClick="open"
+        android:onClick="init"
         android:text="初始化资源"
         tools:ignore="OnClick"></Button>
 
@@ -35,7 +25,7 @@
         android:layout_width="match_parent"
         android:layout_height="50dp"
         android:gravity="center"
-        android:onClick="convert"
+        android:onClick="playvideo"
         android:text="播放视频"
         tools:ignore="OnClick"></Button>
 
@@ -48,5 +38,11 @@
         tools:ignore="OnClick"></Button>
 
 
-
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:gravity="center"
+        android:onClick="convertMp3"
+        android:text="转换音频"
+        tools:ignore="OnClick"></Button>
 </LinearLayout>
