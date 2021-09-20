@@ -6,6 +6,7 @@
 
 #include <SLES/OpenSLES.h>
 #include <SLES/OpenSLES_Android.h>
+#include <FfVideoPlayer.h>
 
 extern "C" {
 #include <android/native_window_jni.h>
@@ -311,4 +312,17 @@ Java_com_kangwang_ffmpeddemo_play_FFmpegdiaConvertMp3_natvie_1convertMp3(
     swr_free(&swrContext);
     avcodec_close(avCodecContext);
     avformat_close_input(&context);
+}
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_com_kangwang_ffmpeddemo_play_FFmpegdiaplayerVideo2_natvie_1playerVideo(JNIEnv *env,
+                                         jobject thiz,
+                                         jstring absolute_path,
+                                         jobject surface) {
+    const char *absoutePath = env->GetStringUTFChars(absolute_path,0);
+    FfVideoPlayer *ffVideoPlayer = new FfVideoPlayer(absoutePath);
+    ffVideoPlayer->init();
+    ffVideoPlayer->initDecor();
+    ffVideoPlayer->
 }

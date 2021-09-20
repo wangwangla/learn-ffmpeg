@@ -1,19 +1,17 @@
 //
-// Created by Admin on 2021/4/24.
+// Created by 28188 on 2021/9/20.
 //
 
-extern "C"{
-#include <libavformat/avformat.h>
-};
 #include <LogUtils.h>
-#include "PlayBase.h"
+#include "FfVideoPlayer.h"
+#include "FfVideoPlay.h"
+#include "FfAudioPlay.h"
 
-PlayBase::PlayBase(char *url) {
-    this->m_url = url;
-    init();
+FfVideoPlayer ::FfVideoPlayer(const char *url){
+
 }
 
-void PlayBase::init() {
+void FfVideoPlayer::init() {
     LOGCATE("init data");
     formatContext = avformat_alloc_context();  //处理封装格式的
     AVDictionary *opts = NULL;//从字典中取值
@@ -39,22 +37,14 @@ void PlayBase::init() {
     }
 }
 
-void PlayBase::play() {
-    if(m_thread== nullptr){
-        startCoding();
-    } else{
-        std::unique_lock<std::mutex> lock(m_mutex);
-        m_Cond.notify_all();
-    }
+void FfVideoPlayer::initDecor() {
+    ffVideoPlay = new FfVideoPlay(this);
+    ffVideoPlay->decoder();
+
+    ffAudioPlay = new FfAudioPlay(this);
+    ffAudioPlay->initDecor();
 }
 
-void PlayBase::startCoding() {
-    m_thread = new thread(doing, this);
+void FfVideoPlayer::play() {
+//    videoThread = new thread(initDecor, nullptr);
 }
-
-void PlayBase::doing(PlayBase *playBase) {
-//    开始执行
-    playBase->codingReady();
-    playBase->codingLoop();
-}
-

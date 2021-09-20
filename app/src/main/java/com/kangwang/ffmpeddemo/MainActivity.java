@@ -75,6 +75,15 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(intent);
                 break;
             }
+            case 5:{
+                Intent intent = new Intent(this,PlayerVideo.class);
+                startActivity(intent);
+                break;
+            }
         }
+    }
+
+    public void playVi(View view) {
+        selectItem(5);
     }
 }

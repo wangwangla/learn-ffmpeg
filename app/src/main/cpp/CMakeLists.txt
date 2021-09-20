@@ -14,7 +14,6 @@ include_directories(
         utils
         play/decor
         play/decor/base
-#        ${CMAKE_SOURCE_DIR}/util
 )
 
 link_directories(
